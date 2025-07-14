@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify
 import requests
 import os
@@ -10,10 +9,14 @@ def get_price(symbol):
     try:
         url = f'https://apipubaws.tcbs.com.vn/stock-insight/v2/stock/beta?tickers={symbol.upper()}'
         response = requests.get(url, timeout=10)
-        data = response.json()
 
+        if response.status_code != 200:
+            return jsonify({"error": f"TCBS API Error: {response.status_code}"}), 500
+
+        data = response.json()
         items = data.get("data", [])
-        if items and "price" in items[0]:
+
+        if len(items) > 0 and "price" in items[0]:
             return jsonify({
                 "symbol": symbol.upper(),
                 "price": int(items[0]["price"]),
