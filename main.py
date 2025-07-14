@@ -1,5 +1,7 @@
+
 from flask import Flask, jsonify
 import requests
+import os
 
 app = Flask(__name__)
 
@@ -21,3 +23,7 @@ def get_price(symbol):
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+
+if __name__ == '__main__':
+    port = int(os.environ.get("PORT", 10000))
+    app.run(debug=False, host='0.0.0.0', port=port)
