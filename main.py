@@ -3,29 +3,25 @@ import requests
 import os
 import ssl
 
-# --- Patch SSL để hỗ trợ legacy TLS của TCBS ---
+# --- Patch to allow unsafe legacy SSL renegotiation for TCBS ---
 try:
     ssl_context = ssl.create_default_context()
-    ssl_context.options |= 0x4  # Bật legacy renegotiation
+    ssl_context.options |= 0x4  # Enable unsafe legacy renegotiation
     ssl._create_default_https_context = lambda: ssl_context
 except Exception as e:
-    print(f"SSL Legacy Patch Error: {e}")
+    print(f"[SSL PATCH ERROR] {e}")
 
 app = Flask(__name__)
 
 @app.route('/api/tcbs/price/<symbol>', methods=['GET'])
 def get_price(symbol):
     try:
-        url = f'https://apipub.tcbs.com.vn/stock-insight/v1/stock/overview?tickers={symbol.upper()}'
+        url = f'https://apipubaws.tcbs.com.vn/stock-insight/v2/stock/beta?tickers={symbol.upper()}'
         response = requests.get(url, timeout=10)
-
-        if response.status_code != 200:
-            return jsonify({"error": f"TCBS API Error: {response.status_code}"}), 500
-
         data = response.json()
-        items = data.get("data", [])
 
-        if len(items) > 0 and "price" in items[0]:
+        items = data.get("data", [])
+        if items and "price" in items[0]:
             return jsonify({
                 "symbol": symbol.upper(),
                 "price": int(items[0]["price"]),
