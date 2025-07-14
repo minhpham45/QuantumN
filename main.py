@@ -1,6 +1,15 @@
 from flask import Flask, jsonify
 import requests
 import os
+import ssl
+
+# --- Patch SSL để hỗ trợ legacy TLS của TCBS ---
+try:
+    ssl_context = ssl.create_default_context()
+    ssl_context.options |= 0x4  # Bật legacy renegotiation
+    ssl._create_default_https_context = lambda: ssl_context
+except Exception as e:
+    print(f"SSL Legacy Patch Error: {e}")
 
 app = Flask(__name__)
 
