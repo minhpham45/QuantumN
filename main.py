@@ -8,18 +8,19 @@ app = Flask(__name__)
 @app.route('/api/tcbs/price/<symbol>', methods=['GET'])
 def get_price(symbol):
     try:
-        url = f'https://apipubaws.tcbs.com.vn/stock-insight/v2/stock/beta/{symbol.upper()}'
+        url = f'https://apipubaws.tcbs.com.vn/stock-insight/v2/stock/beta?tickers={symbol.upper()}'
         response = requests.get(url, timeout=10)
         data = response.json()
 
-        if "price" in data and isinstance(data["price"], (int, float)):
+        items = data.get("data", [])
+        if items and "price" in items[0]:
             return jsonify({
                 "symbol": symbol.upper(),
-                "price": int(data["price"]),
-                "exchange": "HOSE"
+                "price": int(items[0]["price"]),
+                "exchange": items[0].get("exchangeCode", "HOSE")
             })
-        else:
-            return jsonify({"error": f"{symbol.upper()} not found"}), 404
+
+        return jsonify({"error": f"{symbol.upper()} not found"}), 404
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
