@@ -7,7 +7,7 @@ app = Flask(__name__)
 @app.route('/api/tcbs/price/<symbol>', methods=['GET'])
 def get_price(symbol):
     try:
-        url = f'https://apipubaws.tcbs.com.vn/stock-insight/v2/stock/beta?tickers={symbol.upper()}'
+        url = f'https://apipub.tcbs.com.vn/stock-insight/v1/stock/overview?tickers={symbol.upper()}'
         response = requests.get(url, timeout=10)
 
         if response.status_code != 200:
