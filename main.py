@@ -3,10 +3,10 @@ import requests
 import os
 import ssl
 
-# --- Patch to allow unsafe legacy SSL renegotiation for TCBS ---
+# --- Patch SSL legacy ---
 try:
     ssl_context = ssl.create_default_context()
-    ssl_context.options |= 0x4  # Enable unsafe legacy renegotiation
+    ssl_context.options |= 0x4
     ssl._create_default_https_context = lambda: ssl_context
 except Exception as e:
     print(f"[SSL PATCH ERROR] {e}")
@@ -16,7 +16,7 @@ app = Flask(__name__)
 @app.route('/api/tcbs/price/<symbol>', methods=['GET'])
 def get_price(symbol):
     try:
-        url = f'https://apipubaws.tcbs.com.vn/stock-insight/v2/stock/beta?tickers={symbol.upper()}'
+        url = f'https://apipub.tcbs.com.vn/stock-insight/v1/stock/overview?tickers={symbol.upper()}'
         response = requests.get(url, timeout=10)
         data = response.json()
 
